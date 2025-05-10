@@ -10,6 +10,7 @@
     <Folder Include="Entities\" />
     <Folder Include="Interfaces\" />
     <Folder Include="Enums\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>
