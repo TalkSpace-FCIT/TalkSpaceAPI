@@ -1,0 +1,50 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+*.sln.iml
+
+# ASP.NET generated files
+wwwroot/lib/
+Generated\ Files/
+
+# ASP.NET Secrets
+secrets.json
+*.secret.*
+
+# Entity Framework
+Migrations/
+
+# Logs
+*.log
+logs/
+
+# Dotnet Tool Restore
+.dotnet_tool/
+
+# Test Results
+TestResults/
+
+# OS-specific files
+*.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Local Environment Files
+.env
+.env.*
