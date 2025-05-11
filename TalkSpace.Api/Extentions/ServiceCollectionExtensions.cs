@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Context;
-using Persistence.DbInitialization;
 using System;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
+using Persistence.DbInitialization;
 
 namespace TalkSpace.Api.Extensions
 {
