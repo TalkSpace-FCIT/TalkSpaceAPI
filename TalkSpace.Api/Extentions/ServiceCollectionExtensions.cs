@@ -5,8 +5,6 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Context;
 using Persistence.DbInitialization;
@@ -24,19 +22,22 @@ namespace TalkSpace.Api.Extensions
             ConfigureAppData(services, configuration);
             AddDatabase(services, configuration);
             AddIdentityServices(services);
+            ReggisterServices(services);
             AddJwtAuthentication(services, configuration);
             AddMappingServices(services);
-            services.AddScoped<IJWtTokenService, JWtTokenService>();
 
             return services;
         }
-
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             await DbSeeder.SeedAsync(scope.ServiceProvider);
         }
 
+        private static void ReggisterServices(IServiceCollection services)
+        {
+            services.AddScoped<IJWtTokenService, JWtTokenService>();
+        }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
