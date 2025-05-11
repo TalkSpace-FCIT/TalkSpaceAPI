@@ -1,9 +1,4 @@
 ﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
@@ -13,13 +8,9 @@ namespace Domain.Entities
         public DateTime DateRangeEnd { get; set; }
         public ReportType Type { get; set; }
         public DateTime GeneratedDate { get; set; }
-        public string Content { get; set; } // Could store JSON/HTML or serialized data
+        public string Content { get; set; } = null!;
 
-        // Foreign Key
-        public int? ReceptionistId { get; set; }
-
-        // Navigation Properties
-        // Uncomment when adding their classes
-        // public Receptionist GeneratedBy { get; set; } // Aggregation with Receptionist
+        public string DoctorId { get; set; } = null!;
+        public Doctor Doctor { get; set; } = null!;
     }
 }

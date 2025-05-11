@@ -32,7 +32,7 @@ namespace TalkSpace.Api.Extensions
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection"),
+                    configuration.GetSection("DatabaseConnections:DefaultConnection").Value,
                     sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
         }
 

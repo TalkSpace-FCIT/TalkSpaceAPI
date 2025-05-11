@@ -2,12 +2,12 @@
 
 namespace Domain.Entities
 {
-    public class Payment
+    public class Payment : BaseEntity
     {
         public DateTime PaymentDate { get; set; }
         public decimal Amount { get; set; }
-        public PaymentMethod Method { get; set; } // Enum: Cash, CreditCard, Insurance
-        public PaymentResult Status { get; set; } // Enum: Success, Pending, Refunded
+        public PaymentMethod Method { get; set; } // Enum CreditCard
+        public PaymentStatus PaymentStatus { get; set; } // Enum: Success, Pending, Refunded, Failed
 
         // Foreign Key
         public int BillingId { get; set; }
