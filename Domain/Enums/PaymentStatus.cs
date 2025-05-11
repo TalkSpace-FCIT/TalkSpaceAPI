@@ -8,8 +8,9 @@ namespace Domain.Enums
 {
     public enum PaymentStatus
     {
-        Paid,
-        Unpaid,
-        PartiallyPaid
+        Success,
+        Pending,
+        Refunded,
+        Failed
     }
 }
