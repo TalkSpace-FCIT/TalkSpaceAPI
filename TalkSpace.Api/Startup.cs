@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Threading.Tasks;
 using TalkSpace.Api.Extensions;
 
@@ -32,13 +33,17 @@ namespace TalkSpace.Api
             services.AddOpenApi();
         }
 
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app)
         {
+
             // Seed database
             await app.ApplicationServices.SeedDatabaseAsync();
 
             app.UseHttpsRedirection();
+            app.UseSerilogRequestLogging();
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
