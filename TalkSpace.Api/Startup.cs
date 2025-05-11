@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Domain.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace TalkSpace.Api
         {
             // Register all infrastructure services
             services.AddApplicationServices(Configuration);
+
+            //Register JWT authentication
+            services.Configure<JWT>(Configuration.GetSection("JWT"));
 
             // Register controllers
             services.AddControllers();
