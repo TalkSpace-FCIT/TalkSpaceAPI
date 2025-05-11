@@ -12,6 +12,8 @@ using Persistence.Context;
 using Persistence.DbInitialization;
 using System;
 using System.Text;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
 
 namespace TalkSpace.Api.Extensions
 {
@@ -87,6 +89,27 @@ namespace TalkSpace.Api.Extensions
                         Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
                 };
             });
+        }
+        public static IHostBuilder AddSerilog(
+             this IHostBuilder builder,
+             IConfiguration configuration)
+        {
+            var connectionString = configuration.GetConnectionString("DatabaseConnection");
+            builder.UseSerilog((context, loggerConfiguration) =>
+            {
+                loggerConfiguration.WriteTo.Console();
+                loggerConfiguration.WriteTo.MSSqlServer(connectionString,
+                    new MSSqlServerSinkOptions
+                    {
+                        TableName = "Logs",
+                        AutoCreateSqlTable = true,
+                        AutoCreateSqlDatabase = true,
+                        SchemaName = "dbo",
+
+                    });
+            });
+
+            return builder;
         }
 
     }
