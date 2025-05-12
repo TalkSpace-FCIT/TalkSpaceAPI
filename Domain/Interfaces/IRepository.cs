@@ -6,7 +6,7 @@ namespace Domain.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        Task<T?> GetByIdAsync<TId>(TId id) where TId : notnull;
+        Task<T?> GetByIdAsync<TId>(TId id, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null) where TId : notnull;
         Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
         Task AddAsync(T entity);
@@ -16,5 +16,6 @@ namespace Domain.Interfaces
         void RemoveRange(IEnumerable<T> entities);
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+        IQueryable<T> Queryable(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
     }
 }

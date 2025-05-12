@@ -10,8 +10,8 @@ namespace TalkSpace.Api
         {
             var services = builder.Services;
             var configuration = builder.Configuration;
-
-            services.AddApplicationServices(configuration);
+            var environment = builder.Environment;
+            services.AddApplicationServices(configuration, environment);
             return builder;
         }
     }
