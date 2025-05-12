@@ -16,7 +16,8 @@ namespace TalkSpace.Api
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
             .UseSerilog((context, services, configuration) =>
-                    configuration.ReadFrom.Configuration(context.Configuration))          
+                    configuration.ReadFrom.Configuration(context.Configuration))       
+            
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

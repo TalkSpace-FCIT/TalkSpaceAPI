@@ -14,6 +14,9 @@ using System;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
+using Scalar.AspNetCore;
+using Microsoft.OpenApi.Models;
+using TalkSpace.Api.Utilties;
 
 namespace TalkSpace.Api.Extensions
 {
@@ -27,7 +30,7 @@ namespace TalkSpace.Api.Extensions
             AddJwtAuthentication(services, configuration);
             AddMappingServices(services);
             services.AddScoped<IJWtTokenService, JWtTokenService>();
-
+            AddOpenApiDocumentation(services);
             return services;
         }
 
@@ -35,6 +38,17 @@ namespace TalkSpace.Api.Extensions
         {
             using var scope = serviceProvider.CreateScope();
             await DbSeeder.SeedAsync(scope.ServiceProvider);
+        }
+        public static IApplicationBuilder UseOpenApiDocumentation(this IApplicationBuilder app)
+        {
+            //app.UseOpenApi();
+            //app.MapScalarApiReference();
+
+            // Redirect root to Scalar UI
+            //app.MapGet("/", () => Results.Redirect("/scalar/v1"))
+            //   .ExcludeFromDescription();
+
+            return app;
         }
 
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
@@ -111,6 +125,35 @@ namespace TalkSpace.Api.Extensions
 
             return builder;
         }
+
+        private static void AddOpenApiDocumentation(IServiceCollection services)
+        {
+            services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                options.AddDocumentTransformer((document, context, _) =>
+                {
+                    document.Info = new OpenApiInfo
+                    {
+                        Title = "TalkSpace API",
+                        Version = "v1",
+                        Description = """
+                    Comprehensive API for TalkSpace platform.
+                    Supports JSON responses.
+                    JWT authentication required for protected endpoints.
+                    """,
+                        Contact = new OpenApiContact
+                        {
+                            Name = "API Support",
+                            Email = "support@talkspace.com"
+                        }
+                    };
+                    return Task.CompletedTask;
+                });
+            });
+
+        }
+
 
     }
 }
