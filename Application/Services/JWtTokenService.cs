@@ -14,12 +14,12 @@ using System.Threading.Tasks;
 
 namespace Application.Services
 {
-    public class JWtTokenService : IJWtTokenService
+    public class JwtTokenService : IJwtTokenService
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly JWT _jwtSettings;
 
-        public JWtTokenService(UserManager<AppUser> userManager, IOptions<JWT> jwtSettings)
+        public JwtTokenService(UserManager<AppUser> userManager, IOptions<JWT> jwtSettings)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings.Value;
