@@ -18,9 +18,16 @@ namespace Persistence.Repositories
             _dbSet = _dbContext.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync<TId>(TId id) where TId : notnull
+        public async Task<T?> GetByIdAsync<TId>(TId id, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null) where TId : notnull
         {
-            return await _dbSet.FindAsync(id);
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.FirstOrDefaultAsync(entity => EF.Property<TId>(entity, "Id").Equals(id));
         }
 
         public async Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
@@ -84,6 +91,18 @@ namespace Persistence.Repositories
         public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.AnyAsync(predicate);
+        }
+
+        public IQueryable<T> Queryable(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return query;
         }
     }
 }
