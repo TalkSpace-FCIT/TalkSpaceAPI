@@ -21,13 +21,14 @@ using Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using TalkSpace.API;
 using Application.Mappings;
+using System.Security.Claims;
 
 
 namespace TalkSpace.Api.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             services.AddControllers();
             AddOpenApiDocumentation(services);
@@ -37,7 +38,7 @@ namespace TalkSpace.Api.Extensions
             AddJwtAuthentication(services, configuration);
             AddExceptionHandling(services);
             AddMappingServices(services);
-            ReggisterServices(services);
+            ReggisterServices(services, environment);
             return services;
         }
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
@@ -74,16 +75,29 @@ namespace TalkSpace.Api.Extensions
             });
             return services;
         }
-        private static void ReggisterServices(IServiceCollection services)
+        private static void ReggisterServices(IServiceCollection services, IWebHostEnvironment environment)
         {
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
+
             services.AddScoped<IAppointmentService, AppointmentService>();
             
 
+            
+            
+            
+            
+            
+            services.AddScoped<IReportService, ReportService>();
+
+
+            services.AddSingleton<IStorageService>(provider =>
+                new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
+
+            services.AddTransient<IPdfGenerator, PdfGenerator>();
         }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
@@ -153,6 +167,8 @@ namespace TalkSpace.Api.Extensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.NameIdentifier,
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
