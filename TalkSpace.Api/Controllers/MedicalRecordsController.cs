@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using System.Security.Claims;
 
 namespace TalkSpace.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Doctor")]
     public class MedicalRecordsController : BaseApiController
     {
         private readonly IMedicalRecordsService medicalRecordsService;
@@ -21,6 +21,7 @@ namespace TalkSpace.Api.Controllers
             this.medicalRecordsService = medicalRecordsService;
         }
 
+        [Authorize(Roles = "Doctor")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<MedicalRecordResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -31,18 +32,28 @@ namespace TalkSpace.Api.Controllers
             return HandleResult(result);
         }
 
+        [Authorize(Roles = "Doctor,Patient")]
         [HttpGet("patient/{id}")]
         [ProducesResponseType(typeof(IEnumerable<MedicalRecordResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByPatientId(string id)
         {
             Log.Information("Request received for patient medical records: {PatientId}", id);
-
+            var userIdFromToken = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (User.IsInRole("Patient") && userIdFromToken != id)
+            {
+                return StatusCode(403, new
+                {
+                    Error = "Forbidden",
+                    Message = "Patients can only access their own records"
+                });
+            }
             var result = await medicalRecordsService.GetByPatientIdAsync(id);
 
             return HandleResult(result);
         }
 
+        [Authorize(Roles = "Doctor")]
         [HttpPost("add")]
         [ProducesResponseType(typeof(MedicalRecordResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -57,6 +68,7 @@ namespace TalkSpace.Api.Controllers
                 : HandleResult(result);
         }
 
+        [Authorize(Roles = "Doctor")]
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MedicalRecordResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

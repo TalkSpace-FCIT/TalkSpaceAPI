@@ -21,6 +21,7 @@ using Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using TalkSpace.API;
 using Application.Mappings;
+using System.Security.Claims;
 
 
 namespace TalkSpace.Api.Extensions
@@ -155,6 +156,8 @@ namespace TalkSpace.Api.Extensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    RoleClaimType = ClaimTypes.Role,
+                    NameClaimType = ClaimTypes.NameIdentifier,
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
