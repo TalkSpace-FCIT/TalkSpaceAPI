@@ -20,6 +20,7 @@ using Domain.Interfaces;
 using Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using TalkSpace.API;
+using Application.Mappings;
 
 
 namespace TalkSpace.Api.Extensions
@@ -79,6 +80,7 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
 
         }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
@@ -109,7 +111,10 @@ namespace TalkSpace.Api.Extensions
 
         private static void AddMappingServices(IServiceCollection services)
         {
-            services.AddAutoMapper(typeof(Program).Assembly);
+            services.AddAutoMapper(configration =>
+            {
+                configration.AddProfile<MedicalRecordMappingProfile>();
+            });
         }
 
         private static void ConfigureAppData(IServiceCollection services, IConfiguration configuration)
