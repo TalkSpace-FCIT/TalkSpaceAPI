@@ -82,23 +82,15 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
-
             services.AddScoped<IAppointmentService, AppointmentService>();
-            
-
-            
-            
-            
-            
-            
             services.AddScoped<IReportService, ReportService>();
-
 
             services.AddSingleton<IStorageService>(provider =>
                 new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
 
             services.AddTransient<IPdfGenerator, PdfGenerator>();
         }
+
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
