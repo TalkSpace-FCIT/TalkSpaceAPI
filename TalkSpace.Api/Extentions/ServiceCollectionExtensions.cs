@@ -10,12 +10,16 @@ using Persistence.Context;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
+using Scalar.AspNetCore;
+using Microsoft.OpenApi.Models;
+using TalkSpace.Api.Utilties;
 using Persistence.DbInitialization;
 using Microsoft.AspNetCore.Mvc;
 using TalkSpace.Api.Middleware;
 using Domain.Interfaces;
 using Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+
 
 namespace TalkSpace.Api.Extensions
 {
@@ -29,13 +33,31 @@ namespace TalkSpace.Api.Extensions
             AddJwtAuthentication(services, configuration);
             AddExceptionHandling(services);
             AddMappingServices(services);
+<<<<<<< HEAD
             ReggisterServices(services);
+=======
+
+            services.AddScoped<IJWtTokenService, JWtTokenService>();
+            AddOpenApiDocumentation(services);
+
+>>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
             return services;
         }
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
             await DbSeeder.SeedAsync(scope.ServiceProvider);
+        }
+        public static IApplicationBuilder UseOpenApiDocumentation(this IApplicationBuilder app)
+        {
+            //app.UseOpenApi();
+            //app.MapScalarApiReference();
+
+            // Redirect root to Scalar UI
+            //app.MapGet("/", () => Results.Redirect("/scalar/v1"))
+            //   .ExcludeFromDescription();
+
+            return app;
         }
 
         private static void ReggisterServices(IServiceCollection services)
@@ -143,6 +165,7 @@ namespace TalkSpace.Api.Extensions
             return builder;
         }
 
+<<<<<<< HEAD
         private static IServiceCollection AddExceptionHandling(IServiceCollection services)
         {
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -150,5 +173,36 @@ namespace TalkSpace.Api.Extensions
             return services;
         }
 
+=======
+        private static void AddOpenApiDocumentation(IServiceCollection services)
+        {
+            services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                options.AddDocumentTransformer((document, context, _) =>
+                {
+                    document.Info = new OpenApiInfo
+                    {
+                        Title = "TalkSpace API",
+                        Version = "v1",
+                        Description = """
+                    Comprehensive API for TalkSpace platform.
+                    Supports JSON responses.
+                    JWT authentication required for protected endpoints.
+                    """,
+                        Contact = new OpenApiContact
+                        {
+                            Name = "API Support",
+                            Email = "support@talkspace.com"
+                        }
+                    };
+                    return Task.CompletedTask;
+                });
+            });
+
+        }
+
+
+>>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
     }
 }
