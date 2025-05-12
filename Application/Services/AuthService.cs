@@ -52,10 +52,11 @@ namespace Application.Services
                 }
 
                 var token = await _jwtTokenService.GenerateTokenAsync(user);
-                var userResponse = CreateUserResponse(user);
+                var userResponse = CreateUserResponse(user) with { Token = token }; // Use 'with' expression to set the Token property
 
+   
                 Log.Information("Login successful for user: {UserId}", user.Id);
-                return Result<AuthResponse>.Success(new AuthResponse(userResponse, "Login successful.", token));
+                return Result<AuthResponse>.Success(new AuthResponse(userResponse), "Login Successful");
             }
             catch (Exception ex)
             {
@@ -94,10 +95,10 @@ namespace Application.Services
 
                 await _userManager.AddToRoleAsync(user, "Patient");
                 var token = await _jwtTokenService.GenerateTokenAsync(user);
-                var userResponse = CreateUserResponse(user);
+                var userResponse = CreateUserResponse(user) with {Token = token };
 
                 Log.Information("Registration successful for user: {UserId}", user.Id);
-                return Result<AuthResponse>.Success(new AuthResponse(userResponse, "Successful registration.", token));
+                return Result<AuthResponse>.Success(new AuthResponse(userResponse), "Successful registration.");
             }
             catch (Exception ex)
             {
@@ -119,7 +120,7 @@ namespace Application.Services
 
                 await _signInManager.SignOutAsync();
                 Log.Information("Logout successful for user: {UserId}", userId);
-                return Result<LogoutResponse>.Success(new LogoutResponse { Message = "logout successfully." });
+                return Result<LogoutResponse>.Success(new LogoutResponse { }, "logout successfully.");
             }
             catch (Exception ex)
             {
@@ -150,7 +151,8 @@ namespace Application.Services
                 return Result<ProfileResponse>.Success(new ProfileResponse(
                     User: CreateUserResponse(user),
                     LastUpdated: DateTime.UtcNow
-                ));
+                ),
+                "user profile retrieved successfully");
             }
             catch (Exception ex)
             {
@@ -202,7 +204,7 @@ namespace Application.Services
                 return Result<UpdateProfileResponse>.Success(new UpdateProfileResponse(
                     UpdatedProfile: CreateUserResponse(user),
                     Message: "Profile updated successfully."
-                ));
+                ), "");
             }
             catch (Exception ex)
             {
@@ -218,8 +220,9 @@ namespace Application.Services
                 FullName: user.FullName,
                 Email: user.Email!,
                 Bio: user.Bio,
-                Role: user.Discriminator ?? "User"
-            );
+                Role: user.Discriminator ?? "User",
+                Token: ""
+            ); 
         }
     }
 }
