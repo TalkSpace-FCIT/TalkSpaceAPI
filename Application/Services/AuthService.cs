@@ -77,7 +77,7 @@ namespace Application.Services
                     return Result<AuthResponse>.Failure("Email already exists", ErrorSource.TalkSpaceAPI);
                 }
 
-                var user = new AppUser
+                var user = new Patient
                 {
                     FullName = request.FullName,
                     Email = request.Email,
@@ -132,21 +132,21 @@ namespace Application.Services
         {
             try
             {
-                var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
+                var userEmail = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userEmail == null)
                 {
                     Log.Warning("GetProfile failed - user not found in claims");
                     return Result<ProfileResponse>.Failure("User not found", ErrorSource.TalkSpaceAPI);
                 }
 
-                var user = await _userRepository.GetByIdAsync(userId);
+                var user = await _userManager.FindByEmailAsync(userEmail);
                 if (user == null)
                 {
-                    Log.Warning("GetProfile failed - user not found in database: {UserId}", userId);
+                    Log.Warning("GetProfile failed - user not found in database: {userEmail}", userEmail);
                     return Result<ProfileResponse>.Failure("User not found", ErrorSource.TalkSpaceAPI);
                 }
 
-                Log.Information("Profile retrieved successfully for user: {UserId}", userId);
+                Log.Information("Profile retrieved successfully for user: {userEmail}", userEmail);
                 return Result<ProfileResponse>.Success(new ProfileResponse(
                     User: CreateUserResponse(user),
                     LastUpdated: DateTime.UtcNow
@@ -165,17 +165,17 @@ namespace Application.Services
         {
             try
             {
-                var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null)
+                var userEmail = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userEmail == null)
                 {
                     Log.Warning("UpdateProfile failed - user not found in claims");
                     return Result<UpdateProfileResponse>.Failure("User not found", ErrorSource.TalkSpaceAPI);
                 }
 
-                var user = await _userRepository.GetByIdAsync(userId);
+                var user = await _userManager.FindByEmailAsync(userEmail);
                 if (user == null)
                 {
-                    Log.Warning("UpdateProfile failed - user not found in database: {UserId}", userId);
+                    Log.Warning("UpdateProfile failed - user not found in database: {userEmail}", userEmail);
                     return Result<UpdateProfileResponse>.Failure("User not found", ErrorSource.TalkSpaceAPI);
                 }
 
@@ -198,7 +198,7 @@ namespace Application.Services
                 _userRepository.Update(user);
                 await _unitOfWork.CommitAsync();
 
-                Log.Information("Profile updated successfully for user: {UserId}", userId);
+                Log.Information("Profile updated successfully for user: {userEmail}", userEmail);
                 return Result<UpdateProfileResponse>.Success(new UpdateProfileResponse(
                     UpdatedProfile: CreateUserResponse(user),
                     Message: "Profile updated successfully."
@@ -213,13 +213,12 @@ namespace Application.Services
 
         private UserResponse CreateUserResponse(AppUser user)
         {
-            var roles = _userManager.GetRolesAsync(user).Result;
             return new UserResponse(
                 UserId: user.Id,
                 FullName: user.FullName,
                 Email: user.Email!,
                 Bio: user.Bio,
-                Role: roles.FirstOrDefault() ?? "Patient"
+                Role: user.Discriminator ?? "User"
             );
         }
     }

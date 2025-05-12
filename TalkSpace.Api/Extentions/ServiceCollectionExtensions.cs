@@ -19,6 +19,7 @@ using TalkSpace.Api.Middleware;
 using Domain.Interfaces;
 using Persistence.Repositories;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using TalkSpace.API;
 
 
 namespace TalkSpace.Api.Extensions
@@ -27,20 +28,15 @@ namespace TalkSpace.Api.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddControllers();
+            AddOpenApiDocumentation(services);
             ConfigureAppData(services, configuration);
             AddDatabase(services, configuration);
             AddIdentityServices(services);
             AddJwtAuthentication(services, configuration);
             AddExceptionHandling(services);
             AddMappingServices(services);
-<<<<<<< HEAD
             ReggisterServices(services);
-=======
-
-            services.AddScoped<IJWtTokenService, JWtTokenService>();
-            AddOpenApiDocumentation(services);
-
->>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
             return services;
         }
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
@@ -48,18 +44,35 @@ namespace TalkSpace.Api.Extensions
             using var scope = serviceProvider.CreateScope();
             await DbSeeder.SeedAsync(scope.ServiceProvider);
         }
-        public static IApplicationBuilder UseOpenApiDocumentation(this IApplicationBuilder app)
+
+        public static IServiceCollection AddOpenApiDocumentation(this IServiceCollection services)
         {
-            //app.UseOpenApi();
-            //app.MapScalarApiReference();
+            services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                options.AddDocumentTransformer((document, context, _) =>
+                {
+                    document.Info = new OpenApiInfo
+                    {
+                        Title = "TalkSpace API",
+                        Version = "v1",
+                        Description = """
+                    Comprehensive API for TalkSpace platform.
+                    Supports JSON responses.
+                    JWT authentication required for protected endpoints.
+                    """,
+                        Contact = new OpenApiContact
+                        {
+                            Name = "API Support",
+                            Email = "support@talkspace.com"
+                        }
+                    };
+                    return Task.CompletedTask;
+                });
 
-            // Redirect root to Scalar UI
-            //app.MapGet("/", () => Results.Redirect("/scalar/v1"))
-            //   .ExcludeFromDescription();
-
-            return app;
+            });
+            return services;
         }
-
         private static void ReggisterServices(IServiceCollection services)
         {
             services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -165,7 +178,6 @@ namespace TalkSpace.Api.Extensions
             return builder;
         }
 
-<<<<<<< HEAD
         private static IServiceCollection AddExceptionHandling(IServiceCollection services)
         {
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -173,36 +185,5 @@ namespace TalkSpace.Api.Extensions
             return services;
         }
 
-=======
-        private static void AddOpenApiDocumentation(IServiceCollection services)
-        {
-            services.AddOpenApi(options =>
-            {
-                options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
-                options.AddDocumentTransformer((document, context, _) =>
-                {
-                    document.Info = new OpenApiInfo
-                    {
-                        Title = "TalkSpace API",
-                        Version = "v1",
-                        Description = """
-                    Comprehensive API for TalkSpace platform.
-                    Supports JSON responses.
-                    JWT authentication required for protected endpoints.
-                    """,
-                        Contact = new OpenApiContact
-                        {
-                            Name = "API Support",
-                            Email = "support@talkspace.com"
-                        }
-                    };
-                    return Task.CompletedTask;
-                });
-            });
-
-        }
-
-
->>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
     }
 }
