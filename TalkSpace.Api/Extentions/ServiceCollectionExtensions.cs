@@ -5,11 +5,8 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Context;
-using Persistence.DbInitialization;
 using System;
 using System.Text;
 using Serilog;
@@ -17,6 +14,8 @@ using Serilog.Sinks.MSSqlServer;
 using Scalar.AspNetCore;
 using Microsoft.OpenApi.Models;
 using TalkSpace.Api.Utilties;
+using Persistence.DbInitialization;
+
 
 namespace TalkSpace.Api.Extensions
 {
@@ -27,13 +26,15 @@ namespace TalkSpace.Api.Extensions
             ConfigureAppData(services, configuration);
             AddDatabase(services, configuration);
             AddIdentityServices(services);
+            ReggisterServices(services);
             AddJwtAuthentication(services, configuration);
             AddMappingServices(services);
+
             services.AddScoped<IJWtTokenService, JWtTokenService>();
             AddOpenApiDocumentation(services);
+
             return services;
         }
-
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
@@ -51,6 +52,10 @@ namespace TalkSpace.Api.Extensions
             return app;
         }
 
+        private static void ReggisterServices(IServiceCollection services)
+        {
+            services.AddScoped<IJWtTokenService, JWtTokenService>();
+        }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>

@@ -8,7 +8,7 @@ using Persistence.Context;
 namespace Persistence.DbInitialization
 {
     public static class DbSeeder
-    { 
+    {
         public static async Task SeedAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
@@ -25,8 +25,8 @@ namespace Persistence.DbInitialization
         {
             var doctorEmail = Constants.DoctorEmail;
             var doctorUser = await userManager.FindByEmailAsync(doctorEmail);
-            
-            if(doctorUser is null)
+
+            if (doctorUser is null)
             {
                 doctorUser = new Doctor
                 {
