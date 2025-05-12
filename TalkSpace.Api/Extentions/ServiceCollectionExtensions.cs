@@ -83,7 +83,7 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
             services.AddScoped<IReportService, ReportService>();
-
+            services.AddScoped<IAppointmentService, AppointmentService>();
             services.AddSingleton<IStorageService>(provider =>
                 new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
 
