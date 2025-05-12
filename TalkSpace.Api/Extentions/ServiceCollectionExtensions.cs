@@ -81,6 +81,8 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
+            services.AddScoped<IAppointmentService, AppointmentService>();
+            
 
         }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
@@ -114,6 +116,7 @@ namespace TalkSpace.Api.Extensions
             services.AddAutoMapper(configration =>
             {
                 configration.AddProfile<MedicalRecordMappingProfile>();
+                configration.AddProfile<AppointmentMappingProfile>();
             });
         }
 
