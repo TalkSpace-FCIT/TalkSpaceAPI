@@ -1,24 +1,63 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+namespace TalkSpace.API;
+
+using Scalar.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 using Serilog;
+using System.Threading.Tasks;
+using TalkSpace.Api;
 
-namespace TalkSpace.Api
+public class Program
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-            .UseSerilog((context, services, configuration) =>
-                    configuration.ReadFrom.Configuration(context.Configuration))       
-            
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+    public static async Task Main(string[] args)
+
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateLogger();
+
+        try
+        {
+            Log.Information("Starting web host");
+
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Host.UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext()
+                .WriteTo.Console());
+            // Register Services to IoC
+
+            builder.AddServices();
+
+            var app = builder.Build();
+
+            // Configure HTTP Request Pipeline 
+
+            app.MapOpenApi().CacheOutput();
+            app.MapScalarApiReference();
+
+            app.UseRouting();
+            app.UseHttpsRedirection();
+            app.UseSerilogRequestLogging();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseExceptionHandler(_ => { });
+
+            app.MapControllers();
+
+            await app.RunAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly.");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 }
