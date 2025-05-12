@@ -1,9 +1,4 @@
-﻿using Domain.Data;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-using System.Threading.Tasks;
+﻿using Serilog;
 using TalkSpace.Api.Extensions;
 using Scalar.AspNetCore;
 
@@ -21,14 +16,11 @@ namespace TalkSpace.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Register all infrastructure services
-            services.AddApplicationServices(Configuration);
-
-            //Register JWT authentication
-            services.Configure<JWT>(Configuration.GetSection("JWT"));
-
             // Register controllers
             services.AddControllers();
+
+            // Register all infrastructure services
+            services.AddApplicationServices(Configuration);
 
             // OpenAPI/Swagger configuration
             services.AddOpenApi();
@@ -47,7 +39,12 @@ namespace TalkSpace.Api
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+<<<<<<< HEAD
+
+            app.UseExceptionHandler(_ => { });
+=======
             app.UseOpenApiDocumentation();
+>>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

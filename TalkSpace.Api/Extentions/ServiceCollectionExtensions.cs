@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Context;
-using System;
 using System.Text;
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
@@ -15,6 +14,11 @@ using Scalar.AspNetCore;
 using Microsoft.OpenApi.Models;
 using TalkSpace.Api.Utilties;
 using Persistence.DbInitialization;
+using Microsoft.AspNetCore.Mvc;
+using TalkSpace.Api.Middleware;
+using Domain.Interfaces;
+using Persistence.Repositories;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 
 namespace TalkSpace.Api.Extensions
@@ -26,13 +30,17 @@ namespace TalkSpace.Api.Extensions
             ConfigureAppData(services, configuration);
             AddDatabase(services, configuration);
             AddIdentityServices(services);
-            ReggisterServices(services);
             AddJwtAuthentication(services, configuration);
+            AddExceptionHandling(services);
             AddMappingServices(services);
+<<<<<<< HEAD
+            ReggisterServices(services);
+=======
 
             services.AddScoped<IJWtTokenService, JWtTokenService>();
             AddOpenApiDocumentation(services);
 
+>>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
             return services;
         }
         public static async Task SeedDatabaseAsync(this IServiceProvider serviceProvider)
@@ -54,14 +62,23 @@ namespace TalkSpace.Api.Extensions
 
         private static void ReggisterServices(IServiceCollection services)
         {
-            services.AddScoped<IJWtTokenService, JWtTokenService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         }
         private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     configuration.GetSection("DatabaseConnections:DefaultConnection").Value,
-                    sqlOptions => sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName)));
+                    sqlOptions =>
+                    {
+                        sqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                        sqlOptions.EnableRetryOnFailure();
+                    })
+                .ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning)));
         }
 
         private static void AddIdentityServices(IServiceCollection services)
@@ -85,6 +102,23 @@ namespace TalkSpace.Api.Extensions
         private static void ConfigureAppData(IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<DatabaseConnections>(configuration.GetSection("ConnectionStrings"));
+            services.Configure<JWT>(configuration.GetSection("JWT"));
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState
+                        .Where(x => x.Value!.Errors.Count > 0)
+                        .Select(x => new {
+                            Field = x.Key,
+                            Messages = x.Value!.Errors.Select(e => e.ErrorMessage)
+                        });
+
+                    return new BadRequestObjectResult(new { Errors = errors });
+                };
+            });
+
         }
 
         private static void AddJwtAuthentication(IServiceCollection services, IConfiguration configuration)
@@ -131,6 +165,15 @@ namespace TalkSpace.Api.Extensions
             return builder;
         }
 
+<<<<<<< HEAD
+        private static IServiceCollection AddExceptionHandling(IServiceCollection services)
+        {
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
+            return services;
+        }
+
+=======
         private static void AddOpenApiDocumentation(IServiceCollection services)
         {
             services.AddOpenApi(options =>
@@ -160,5 +203,6 @@ namespace TalkSpace.Api.Extensions
         }
 
 
+>>>>>>> 305cc1b76e83b20a1b6f8e50ece2d33152f93510
     }
 }

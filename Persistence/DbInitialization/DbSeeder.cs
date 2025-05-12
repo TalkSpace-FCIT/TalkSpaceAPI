@@ -3,7 +3,9 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Persistence.Context;
+using Serilog;
 
 namespace Persistence.DbInitialization
 {
@@ -16,9 +18,22 @@ namespace Persistence.DbInitialization
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            await context.Database.MigrateAsync();
-            await SeedRolesAsync(roleManager);
-            await SeedDefaultDoctorAsync(userManager, roleManager);
+            try
+            {
+                Log.Information("Applying pending migrations...");
+                await context.Database.MigrateAsync();
+
+                Log.Information("Seeding database...");
+                await SeedRolesAsync(roleManager);
+                await SeedDefaultDoctorAsync(userManager, roleManager);
+                Log.Information("Database seeding completed successfully");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while migrating or seeding the database");
+                throw;
+            }
+
         }
 
         private static async Task SeedDefaultDoctorAsync(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
