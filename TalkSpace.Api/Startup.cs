@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System.Threading.Tasks;
 using TalkSpace.Api.Extensions;
+using Scalar.AspNetCore;
 
 namespace TalkSpace.Api
 {
@@ -31,14 +32,13 @@ namespace TalkSpace.Api
 
             // OpenAPI/Swagger configuration
             services.AddOpenApi();
+     
         }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app)
         {
-
-            // Seed database
             await app.ApplicationServices.SeedDatabaseAsync();
 
             app.UseHttpsRedirection();
@@ -47,9 +47,12 @@ namespace TalkSpace.Api
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseOpenApiDocumentation();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                // Remove MapOpenApi().CacheOutput() if present
+                endpoints.MapScalarApiReference(); // Scalar UI endpoint
             });
         }
     }
