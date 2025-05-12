@@ -8,7 +8,8 @@ namespace Domain.Entities
         public decimal TotalCost => Payments.Where(p => p.PaymentStatus == PaymentStatus.Success).Sum(p => p.Amount);
         public DateTime InvoiceDate { get; set; }
         public PaymentStatus Status { get; set; } // Enum: Paid, Pending, Failed, Refunded
-
+        public int AppointmentId { get; set; }
+        public Appointment Appointment { get; set; }
         // Required Relationship: Patient (1-to-1)
         public string PatientId { get; set; }
         public Patient Patient { get; set; } = null!;
@@ -16,10 +17,7 @@ namespace Domain.Entities
         // Optional Relationship: Payments (1-to-Many)
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
-       public bool IsPaid()
-        {
-            return Status == PaymentStatus.Success;
-        }
+        public bool IsPaid => Status == PaymentStatus.Success;
 
         public void MarkAsPaid()
         {
