@@ -13,11 +13,11 @@ namespace TalkSpace.Api.Controllers
             {
                 return result.IsEmpty
                     ? NoContent() 
-                    : Ok(new ApiResponse<T>(result.Value));
+                    : Ok(new ApiResponse<T>(result.Value, result.Message));
             }
 
-            LogError(result.Error, result.ErrorSource);
-            return HandleError(result.Error, result.ErrorSource);
+            LogError(result.Message, result.ErrorSource);
+            return HandleError(result.Message, result.ErrorSource);
         }
 
         protected IActionResult HandleQueryResult<T>(QueryResult<T> result)
@@ -26,10 +26,10 @@ namespace TalkSpace.Api.Controllers
                 return NotFound(new ApiResponse<object>(null, "Resource not found."));
 
             if (result.IsSuccess)
-                return Ok(new ApiResponse<T>(result.Value));
+                return Ok(new ApiResponse<T>(result.Value, result.Message));
 
-            LogError(result.Error, result.ErrorSource);
-            return HandleError(result.Error, result.ErrorSource);
+            LogError(result.Message, result.ErrorSource);
+            return HandleError(result.Message, result.ErrorSource);
         }
 
         private void LogError(string? error, ErrorSource errorSource)

@@ -1,6 +1,7 @@
 ﻿
 using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Persistence.Context;
 using System.Linq.Expressions;
 
@@ -22,14 +23,30 @@ namespace Persistence.Repositories
             return await _dbSet.FindAsync(id);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
         {
-            return await _dbSet.ToListAsync();
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> FindAsync(
+            Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
         {
-            return await _dbSet.Where(predicate).ToListAsync();
+            IQueryable<T> query = _dbSet;
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.Where(predicate).ToListAsync();
         }
 
         public async Task AddAsync(T entity)
