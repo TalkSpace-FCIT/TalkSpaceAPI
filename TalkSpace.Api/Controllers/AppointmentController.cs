@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions;
 using Application.DTOs.Requests.AppointmentRequests;
 using Application.DTOs.Responses.AppointmentResponses;
+using Domain.Entities;
 using Domain.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,7 @@ namespace TalkSpace.Api.Controllers
 {
     [Route("api/[Controller]")]
     [ApiController]
-    [Authorize] 
+    [Authorize(Roles ="Patient,Doctor")] 
     public class AppointmentController : BaseApiController
     {
         private readonly IAppointmentService _appointmentService;
@@ -33,6 +34,7 @@ namespace TalkSpace.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Doctor")]
         [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
@@ -40,8 +42,7 @@ namespace TalkSpace.Api.Controllers
             return HandleResult(result);
         }
 
-        [HttpGet("patient/{patientId}")]
-        [Authorize(Roles = "Patient,Doctor")] 
+        [HttpGet("patient/{patientId}")] 
         [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetByPatientId(string patientId)
@@ -75,9 +76,24 @@ namespace TalkSpace.Api.Controllers
         [HttpGet("{appointmentId}")]
         [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(string appointmentId)
+        public async Task<IActionResult> GetById(int appointmentId)
         {
             var result = await _appointmentService.GetAppointmentByIdAsync(appointmentId);
+            if (!result.IsSuccess || result.Value == null)
+            {
+                return HandleResult(result);
+            }
+            // Only allow the patient who owns the appointment to view it
+            if (User.IsInRole("Patient") )
+            {
+                var currentuserid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if(result.Value.PatientId != currentuserid)
+                {
+                    return Forbid();
+                }
+
+            }
+
             return HandleResult(result);
         }
     }

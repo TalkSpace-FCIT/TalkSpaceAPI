@@ -1,7 +1,6 @@
-﻿
-using Domain.Enums;
+﻿using Domain.Enums;
 
-namespace Application.DTOs.Responses
+namespace Application.DTOs.Responses.ReportResponse
 {
     public record ReportResponse(
         int Id, 
