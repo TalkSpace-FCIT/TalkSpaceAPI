@@ -48,5 +48,10 @@ Desktop.ini
 # Local Environment Files
 .env
 .env.*
-PrivateStorage/
+
+# Configuration files
 appsettings.json
+appsettings.*.json
+
+# Private storage
+PrivateStorage/
