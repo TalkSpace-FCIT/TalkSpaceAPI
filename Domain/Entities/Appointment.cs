@@ -30,7 +30,7 @@ namespace Domain.Entities
 
         public Appointment()
         {
-            VisitType = VisitType.InPerson;
+            VisitType = VisitType.consultation;
             Status = AppointmentStatus.Scheduled;
             StatusUpdatedOn = DateTime.UtcNow;
         }
