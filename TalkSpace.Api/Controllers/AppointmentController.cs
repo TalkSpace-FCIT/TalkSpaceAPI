@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Serilog;
+using System.Security.Claims;
 
 namespace TalkSpace.Api.Controllers
 {
@@ -47,7 +48,15 @@ namespace TalkSpace.Api.Controllers
         [HttpGet("GetBydoctor/{id}")]
         public async Task<IActionResult> GetAppointmentByDoctorId(string id)
         {
-         
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != id)
+            {
+                return StatusCode(403, new
+                {
+                    Error = "Forbidden",
+                    Message = "Patients can only access their own records"
+                });
+            }
             var res = await appointmentService.GetAppointmentsByDoctorIdAsync(id);
             return HandleResult(res);
         }
