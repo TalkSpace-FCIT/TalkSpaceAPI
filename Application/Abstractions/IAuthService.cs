@@ -1,7 +1,7 @@
-﻿using Application.DTOs.Responses;
-using Application.DTOs;
-using Domain.Results;
+﻿using Domain.Results;
 using System.Security.Claims;
+using Application.DTOs.Requests.AuthRequests;
+using Application.DTOs.Responses.AuthResponse;
 
 namespace Application.Abstractions
 {

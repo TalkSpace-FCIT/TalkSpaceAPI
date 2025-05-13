@@ -1,7 +1,6 @@
-﻿
-using Domain.Enums;
+﻿using Domain.Enums;
 
-namespace Application.DTOs.Requests
+namespace Application.DTOs.Requests.ReportRequest
 {
     public record GenerateReportRequest(
         DateTime DateRangeStart, 
