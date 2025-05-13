@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions;
-using Application.DTOs;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.AuthRequests;
+using Application.DTOs.Responses.AuthResponse;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions;
-using Application.DTOs;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.AuthRequests;
+using Application.DTOs.Responses.AuthResponse;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Results;

@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions;
-using Application.DTOs.Requests;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.ReportRequest;
+using Application.DTOs.Responses.ReportResponse;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

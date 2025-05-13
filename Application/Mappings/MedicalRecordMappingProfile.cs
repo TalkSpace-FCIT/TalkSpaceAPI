@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Domain.Entities;
-using Application.DTOs.Requests;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.MedicalrecordRequest;
+using Application.DTOs.Responses.MedicalrecordResponse;
 
 namespace Application.Mappings
 {

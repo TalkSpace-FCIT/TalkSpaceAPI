@@ -1,5 +1,4 @@
-﻿
-namespace Application.DTOs.Responses
+﻿namespace Application.DTOs.Responses.AuthResponse
 {
     public record UserResponse(
     string UserId,

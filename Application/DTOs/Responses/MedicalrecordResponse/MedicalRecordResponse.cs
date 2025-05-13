@@ -1,5 +1,4 @@
-﻿
-namespace Application.DTOs.Responses
+﻿namespace Application.DTOs.Responses.MedicalrecordResponse
 {
     public record MedicalRecordResponse(
         int Id,

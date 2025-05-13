@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions;
-using Application.DTOs.Requests;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.MedicalrecordRequest;
+using Application.DTOs.Responses.MedicalrecordResponse;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
