@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions;
 using Application.DTOs.Requests.AppointmentRequests;
+using Application.DTOs.Responses.AppointmentResponses;
 using Domain.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -10,64 +11,74 @@ using System.Security.Claims;
 
 namespace TalkSpace.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[Controller]")]
     [ApiController]
-    [Authorize(Roles = "Patient")]
+    [Authorize] 
     public class AppointmentController : BaseApiController
     {
-        private readonly IAppointmentService appointmentService;
+        private readonly IAppointmentService _appointmentService;
 
         public AppointmentController(IAppointmentService appointmentService)
         {
-            this.appointmentService = appointmentService;
+            _appointmentService = appointmentService;
         }
 
-        [HttpPost("Add")]
-        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentRequest appointmentRequest)
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateAppointmentRequest request)
         {
-
-            var res = await appointmentService.CreateAppointmentAsync(appointmentRequest);
-
-            return HandleResult(res); 
+            var result = await _appointmentService.CreateAppointmentAsync(request);
+            return HandleResult(result);
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAllAppointments()
-        {
-          
-            var res = await appointmentService.GetAllAsync();
 
-            return HandleResult(res);
-        }
-        [HttpGet("GetBypatient/{id}")]
-        public async Task<IActionResult> GetAppointmentByPatientId(string id)
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
         {
-            
-            var res = await appointmentService.GetAppointmentsByPatientIdAsync(id);
-            return HandleResult(res);
+            var result = await _appointmentService.GetAllAsync();
+            return HandleResult(result);
         }
-        [HttpGet("GetBydoctor/{id}")]
-        public async Task<IActionResult> GetAppointmentByDoctorId(string id)
+
+        [HttpGet("patient/{patientId}")]
+        [Authorize(Roles = "Patient,Doctor")] 
+        [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetByPatientId(string patientId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != id)
+            // Patients can only view their own appointments
+            if (User.IsInRole("Patient") && User.FindFirstValue(ClaimTypes.NameIdentifier) != patientId)
             {
-                return StatusCode(403, new
-                {
-                    Error = "Forbidden",
-                    Message = "Patients can only access their own records"
-                });
+                return Forbid();
             }
-            var res = await appointmentService.GetAppointmentsByDoctorIdAsync(id);
-            return HandleResult(res);
+
+            var result = await _appointmentService.GetAppointmentsByPatientIdAsync(patientId);
+            return HandleResult(result);
         }
-        [HttpGet("GetByID/{id}")]
-        public async Task<IActionResult> GetAppointmentById(string id)
+
+        [HttpGet("doctor/{doctorId}")]
+        [Authorize(Roles = "Doctor")] 
+        [ProducesResponseType(typeof(IEnumerable<AppointmentResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> GetByDoctorId(string doctorId)
         {
-            
-            var res = await appointmentService.GetAppointmentByIdAsync(id);
-            return HandleResult(res);
+            // Doctors can only view their own appointments
+            if (User.IsInRole("Doctor") && User.FindFirstValue(ClaimTypes.NameIdentifier) != doctorId)
+            {
+                return Forbid();
+            }
+
+            var result = await _appointmentService.GetAppointmentsByDoctorIdAsync(doctorId);
+            return HandleResult(result);
         }
 
-
+        [HttpGet("{appointmentId}")]
+        [ProducesResponseType(typeof(AppointmentResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetById(string appointmentId)
+        {
+            var result = await _appointmentService.GetAppointmentByIdAsync(appointmentId);
+            return HandleResult(result);
+        }
     }
 }
