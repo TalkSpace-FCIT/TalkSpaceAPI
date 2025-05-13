@@ -1,7 +1,7 @@
 ﻿
 using Application.Abstractions;
-using Application.DTOs.Requests;
-using Application.DTOs.Responses;
+using Application.DTOs.Requests.ReportRequest;
+using Application.DTOs.Responses.ReportResponse;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;

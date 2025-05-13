@@ -72,7 +72,7 @@ namespace Application.Services
             return Result<AppointmentResponse>.Success(response, "Created Done  Successfully");
         }
 
-        public async Task<Result<AppointmentResponse>> GetAppointmentByIdAsync(string id)
+        public async Task<Result<AppointmentResponse>> GetAppointmentByIdAsync(int id)
         {
             var appointment = await _appointmentRepository.GetByIdAsync(id);
             if (appointment == null)
@@ -86,6 +86,7 @@ namespace Application.Services
 
             response.DoctorName = doctor != null ? $"{doctor.FullName}" : "Unknown";
             response.PatientName = patient != null ? $"{patient.FullName}" : "Unknown";
+            response.PatientId = appointment.PatientId;
 
             return Result<AppointmentResponse>.Success(response, "Operation Done Successfully");
         }

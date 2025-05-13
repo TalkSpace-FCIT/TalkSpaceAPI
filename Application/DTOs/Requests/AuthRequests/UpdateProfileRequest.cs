@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.DTOs
+namespace Application.DTOs.Requests.AuthRequests
 {
     public record UpdateProfileRequest(
         [Required(ErrorMessage = "Full name is required.")]

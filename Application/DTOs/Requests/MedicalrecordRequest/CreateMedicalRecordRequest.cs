@@ -1,5 +1,4 @@
-﻿
-namespace Application.DTOs.Requests
+﻿namespace Application.DTOs.Requests.MedicalrecordRequest
 {
     public record CreateMedicalRecordRequest(
         DateTime VisitDate,

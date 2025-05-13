@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.DTOs
+namespace Application.DTOs.Requests.AuthRequests
 {
     public record LoginRequest(
         [Required(ErrorMessage = "Email is required.")]

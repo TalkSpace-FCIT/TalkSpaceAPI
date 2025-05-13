@@ -14,6 +14,7 @@ namespace Application.DTOs.Responses.AppointmentResponses
         public string Status { get; set; }
         public string PatientName { get; set; }
         public string DoctorName { get; set; }
+        public string PatientId { get; set; }
         public DateTime StatusUpdatedOn { get; set; }
     }
 }

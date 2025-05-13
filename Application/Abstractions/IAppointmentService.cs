@@ -14,7 +14,7 @@ namespace Application.Abstractions
     public interface IAppointmentService
     {   
         Task<Result<AppointmentResponse>> CreateAppointmentAsync(CreateAppointmentRequest request);
-        Task <Result<AppointmentResponse>> GetAppointmentByIdAsync(string id);
+        Task <Result<AppointmentResponse>> GetAppointmentByIdAsync(int id);
         Task<Result<AppointmentListResponse>> GetAppointmentsByPatientIdAsync(string patientId);
         Task<Result<AppointmentListResponse>> GetAppointmentsByDoctorIdAsync(string doctorId);
         Task<Result<AppointmentResponse>> UpdateAppointmentAsync(int id, UpdateAppointmentRequest request);
