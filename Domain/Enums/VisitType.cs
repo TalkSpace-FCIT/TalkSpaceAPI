@@ -2,7 +2,7 @@
 {
     public enum VisitType
     {
-        InPerson,
+        consultation,
         FollowUp,
         Emergency
     }
