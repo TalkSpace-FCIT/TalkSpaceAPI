@@ -34,17 +34,16 @@ public class Program
             var app = builder.Build();
 
             // Configure HTTP Request Pipeline 
-
+            app.UseCors("AllowAll");
             app.MapOpenApi().CacheOutput();
             app.MapScalarApiReference();
-
             app.UseRouting();
             app.UseHttpsRedirection();
             app.UseSerilogRequestLogging();
 
+
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseExceptionHandler(_ => { });
 
             app.MapControllers();
