@@ -25,8 +25,29 @@ namespace Persistence.Repositories
 
         public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.SaveChangesAsync(cancellationToken);
+            try
+            {
+                return await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+
+                var errorMessages = new List<string>();
+                var current = ex;
+                while (current != null)
+                {
+                    errorMessages.Add(current.Message);
+                    current = current.InnerException;
+                }
+
+                var fullError = string.Join(" --> ", errorMessages);
+                Console.WriteLine($"SaveChanges failed: {fullError}");
+
+                // Option 2: Re-throw with combined error information
+                throw new Exception($"Error while saving changes: {fullError}", ex);
+            }
         }
+
 
         public async Task RollbackAsync()
         {
