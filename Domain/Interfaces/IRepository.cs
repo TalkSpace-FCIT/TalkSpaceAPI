@@ -17,5 +17,6 @@ namespace Domain.Interfaces
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
         IQueryable<T> Queryable(Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
+        
     }
 }

@@ -86,6 +86,7 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IpaymentRepository, PaymentRepository>();
             services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IBillingRepository, BillingRepository>();
             services.AddSingleton<IStorageService>(provider =>
                 new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
             services.AddScoped<IpaymentService, PaymentService>();
