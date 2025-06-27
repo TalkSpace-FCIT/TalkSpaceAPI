@@ -90,7 +90,7 @@ namespace TalkSpace.Api.Extensions
             services.AddSingleton<IStorageService>(provider =>
                 new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
             services.AddScoped<IpaymentService, PaymentService>();
-
+            services.AddScoped<IStripeHelperService, StripeHelperService>();
             services.AddTransient<IPdfGenerator, PdfGenerator>();
         }
 

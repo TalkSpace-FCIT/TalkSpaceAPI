@@ -1,6 +1,7 @@
 ﻿using Application.Abstractions;
 using Application.DTOs.Requests.PaymentRequests;
 using Application.Services;
+using Azure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,12 @@ namespace TalkSpace.Api.Controllers
     public class PaymentController : BaseApiController
     {
         private readonly IpaymentService paymentService;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IpaymentService _paymentService)
+        public PaymentController(IpaymentService _paymentService, ILogger<PaymentController> logger)
         {
             paymentService = _paymentService;
+            _logger = logger;
         }
         [HttpPost("Checkout")]
         public async Task<IActionResult> CreatePaymentSession([FromBody]SessionBookingRequest request)
@@ -33,6 +36,8 @@ namespace TalkSpace.Api.Controllers
                     sessionId = request.SessionId,
                     Amount = result.Amount,
                     Currency = result.Currency,
+                    PaymentIntentId = result.PaymentIntentId,
+                    ClientSecretCredential = result.ClientSecret,
                     Status = "Payment intent created successfully"
                 });
 

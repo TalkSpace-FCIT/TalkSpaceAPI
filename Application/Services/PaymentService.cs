@@ -8,6 +8,9 @@ using Domain.Interfaces;
 using Domain.Enums;
 using Persistence.Repositories;
 using Microsoft.Extensions.Logging;
+using Stripe.V2;
+using Microsoft.Extensions.Configuration;
+
 
 namespace Application.Services
 {
@@ -17,18 +20,24 @@ namespace Application.Services
         private readonly IUnitOfWork unitOfWork;
         private readonly ILogger<PaymentService> _logger;
         private readonly IBillingRepository _billingRepository;
+        private readonly IConfiguration configuration;
+        private readonly IStripeHelperService _stripeHelperService;
 
         public PaymentService(
             IpaymentRepository paymentrepository, 
             IUnitOfWork unitOfWork,
             ILogger<PaymentService> logger,
-            IBillingRepository billingRepository
+            IBillingRepository billingRepository,
+            IConfiguration _configuration,
+            IStripeHelperService stripeHelperService
             )
         {
             this.paymentrepository = paymentrepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
             _billingRepository = billingRepository;
+            configuration = _configuration;
+            _stripeHelperService = stripeHelperService;
         }
         // Pseudocode for HandlePaymentConfirmationAsync:
         // 1. Validate the Stripe webhook signature using the provided signature and secret.
@@ -39,25 +48,138 @@ namespace Application.Services
 
         public async Task HandlePaymentConfirmationAsync(string json, string signature)
         {
-            //string endpointsecrest =""
-            // Example using Stripe .NET SDK (pseudo-implementation)
-            // string endpointSecret = "<your-stripe-webhook-secret>";
-            // var stripeEvent = EventUtility.ConstructEvent(json, signature, endpointSecret);
-            // switch (stripeEvent.Type)
-            // {
-            //     case Events.PaymentIntentSucceeded:
-            //         // Update session/payment status in your system
-            //         break;
-            //     // Handle other event types as needed
-            // }
-            await Task.CompletedTask;
+            try
+            {
+                if (string.IsNullOrEmpty(json))
+                {
+                    _logger.LogError("Received empty JSON payload for Stripe webhook");
+                    throw new ArgumentException("JSON payload cannot be null or empty", nameof(json));
+                }
+
+                if (string.IsNullOrEmpty(signature))
+                {
+                    _logger.LogError("Received empty Stripe signature for webhook");
+                    throw new ArgumentException("Signature cannot be null or empty", nameof(signature));
+                }
+
+                // Get webhook secret from configuration
+                string endpointSecret = configuration["Stripe:WebhookSecret"];
+                if (string.IsNullOrEmpty(endpointSecret))
+                {
+                    _logger.LogError("Stripe webhook secret is not configured");
+                    throw new InvalidOperationException("Webhook secret is not configured");
+                }
+
+                // Fix: Pass the correct parameters in the right order
+                var stripeEvent = _stripeHelperService.PrepareStripeEvent(json, signature, endpointSecret);
+
+                _logger.LogInformation("Processing webhook event: {EventType} with ID: {EventId}",
+                    stripeEvent.Type, stripeEvent.Id);
+
+                // Handle different event types
+                switch (stripeEvent.Type)
+                {
+                    case "PaymentIntentSucceeded":
+                        await HandlePaymentIntentSucceeded(stripeEvent);
+                        break;
+                    case "ChargeSucceeded":
+                        await HandleChargeSucceeded(stripeEvent);
+                        break;
+                    default:
+                        _logger.LogInformation("Unhandled webhook event type: {EventType}", stripeEvent.Type);
+                        break;
+                }
+            }
+            catch (StripeException stripeEx)
+            {
+                _logger.LogError(stripeEx, "Stripe webhook signature verification failed");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing webhook event");
+                throw;
+            }
+        }
+        private async Task HandleChargeSucceeded(Stripe.Event stripeEvent)
+        {
+            var charge = stripeEvent.Data.Object as Charge;
+            if (charge == null)
+            {
+                _logger.LogWarning("Charge object not found in webhook event");
+                return;
+            }
+
+            // Get the PaymentIntent ID from the charge
+            var paymentIntentId = charge.PaymentIntentId;
+            if (string.IsNullOrEmpty(paymentIntentId))
+            {
+                _logger.LogWarning("PaymentIntentId not found in charge object");
+                return;
+            }
+
+            var payments = await paymentrepository.FindAsync(p => p.PaymentIntentId == paymentIntentId);
+            var payment = payments.FirstOrDefault();
+
+            if (payment != null && payment.PaymentStatus == PaymentStatus.Pending)
+            {
+                payment.PaymentStatus = PaymentStatus.Success;
+                payment.PaymentDate = DateTime.UtcNow;
+                paymentrepository.Update(payment);
+                await unitOfWork.CommitAsync();
+
+                _logger.LogInformation("Payment status updated to Success for PaymentIntentId {PaymentIntentId} via charge.succeeded",
+                    paymentIntentId);
+            }
+            else if (payment == null)
+            {
+                _logger.LogWarning("No payment record found for PaymentIntentId {PaymentIntentId} from charge",
+                    paymentIntentId);
+            }
+            else
+            {
+                _logger.LogInformation("Payment {PaymentId} already processed with status {Status}",
+                    payment.Id, payment.PaymentStatus);
+            }
         }
 
-        // Pseudocode for PayForSessionAsync:
-        // 1. Validate the request (user/session/amount).
-        // 2. Create a Stripe PaymentIntent or Checkout Session.
-        // 3. Save payment/session info to DB.
-        // 4. Return the updated SessionBookingRequest (optionally with payment info).
+        private async Task HandlePaymentIntentSucceeded(Stripe.Event stripeEvent)
+        {
+            var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+            if (paymentIntent == null)
+            {
+                _logger.LogWarning("PaymentIntent object not found in webhook event");
+                return;
+            }
+
+            // Find the payment record by PaymentIntentId
+            var payments = await paymentrepository.FindAsync(p => p.PaymentIntentId == paymentIntent.Id);
+            var payment = payments.FirstOrDefault();
+            _logger.LogDebug("Payment has Allocated by PaymentIntentID {paymentIntent} ", paymentIntent.Id);
+
+            if (payment != null && payment.PaymentStatus == PaymentStatus.Pending)
+            {
+                _logger.LogDebug("Payment is not null and the status of it is Pending");
+                payment.PaymentStatus = PaymentStatus.Success;
+                payment.PaymentDate = DateTime.UtcNow;
+                paymentrepository.Update(payment);
+                await unitOfWork.CommitAsync();
+
+                _logger.LogInformation("Payment status updated to Success for PaymentIntentId {PaymentIntentId}",
+                    paymentIntent.Id);
+            }
+            else if (payment == null)
+            {
+                _logger.LogWarning("No payment record found for PaymentIntentId {PaymentIntentId}",
+                    paymentIntent.Id);
+            }
+            else
+            {
+                _logger.LogInformation("Payment {PaymentId} already processed with status {Status}",
+                    payment.Id, payment.PaymentStatus);
+            }
+        }
+
 
         public async Task<SessionBookingRequest> PayForSessionAsync(SessionBookingRequest request)
         {
@@ -133,12 +255,7 @@ namespace Application.Services
 
         }
 
-        // Pseudocode for RequestSessionRefundAsync:
-        // 1. Lookup payment intent by sessionId.
-        // 2. Create a Stripe refund for the payment intent.
-        // 3. Save refund info to DB.
-        // 4. Return RefundResult with details.
-
+       
         public async Task<RefundResult> RequestSessionRefundAsync(string sessionId, string reason)
         {
             // Example using Stripe .NET SDK (pseudo-implementation)

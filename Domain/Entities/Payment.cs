@@ -8,7 +8,7 @@ namespace Domain.Entities
         public decimal Amount { get; set; }
         public string Method { get; set; } // Enum Card
         public PaymentStatus PaymentStatus { get; set; } // Enum: Success, Pending, Refunded, Failed
-        public bool IsPaid => PaymentDate != DateTime.MinValue;
+        public bool IsPaid => PaymentStatus == PaymentStatus.Success;
         public string ClientSecret { get; set; }
         public string PaymentIntentId { get; set; }
         // Foreign Key
