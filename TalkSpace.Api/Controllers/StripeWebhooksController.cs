@@ -42,12 +42,27 @@ namespace TalkSpace.Api.Controllers
                     _logger.LogWarning("Stripe-Signature header not found");
                     return BadRequest("Missing Stripe-Signature header");
                 }
-
+                
                 _logger.LogDebug("Received webhook with headers: {Headers}", Request.Headers);
 
-                await paymentService.HandlePaymentConfirmationAsync(json, stripeSignature);
-
-                return Ok(new { received = true });
+                try
+                {
+                    await paymentService.HandlePaymentConfirmationAsync(json, stripeSignature);
+                    _logger.LogInformation("Payment webhook processed successfully");
+                    return Ok(new { received = true ,mewssage= "the payment webhook has captured successfully" });
+                }
+                catch (StripeException ex)
+                {
+                    
+                    _logger.LogError(ex, "Stripe webhook validation failed: {Message}", ex.Message);
+                    return BadRequest(new { error = "Webhook validation failed", message = ex.Message });
+                }
+                catch (ArgumentException ex)
+                {
+                    // Handle invalid arguments (malformed JSON, missing required fields, etc.)
+                    _logger.LogError(ex, "Invalid webhook payload: {Message}", ex.Message);
+                    return BadRequest(new { error = "Invalid payload", message = ex.Message });
+                }
             }
             catch (StripeException ex)
             {
