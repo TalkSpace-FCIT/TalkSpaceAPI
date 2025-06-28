@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.Services
 {
-    public class PaymentService : IpaymentService
+    public class PaymentService : IPaymentService
     {
         private readonly IpaymentRepository paymentrepository;
         private readonly IUnitOfWork unitOfWork;
@@ -39,12 +39,6 @@ namespace Application.Services
             configuration = _configuration;
             _stripeHelperService = stripeHelperService;
         }
-        // Pseudocode for HandlePaymentConfirmationAsync:
-        // 1. Validate the Stripe webhook signature using the provided signature and secret.
-        // 2. Parse the JSON payload to extract event type and data.
-        // 3. If event is payment_intent.succeeded, update session/payment status in DB.
-        // 4. Handle other relevant events as needed.
-        // 5. Return Task.CompletedTask.
 
         public async Task HandlePaymentConfirmationAsync(string json, string signature)
         {

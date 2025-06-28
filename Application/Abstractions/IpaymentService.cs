@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Abstractions
 {
-    public interface IpaymentService
+    public interface IPaymentService
     {
         // Core session payment
         Task<SessionBookingRequest> PayForSessionAsync(SessionBookingRequest request);

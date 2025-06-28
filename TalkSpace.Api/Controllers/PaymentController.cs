@@ -14,10 +14,10 @@ namespace TalkSpace.Api.Controllers
     [Authorize(Roles = "Patient")]
     public class PaymentController : BaseApiController
     {
-        private readonly IpaymentService paymentService;
+        private readonly IPaymentService paymentService;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IpaymentService _paymentService, ILogger<PaymentController> logger)
+        public PaymentController(IPaymentService _paymentService, ILogger<PaymentController> logger)
         {
             paymentService = _paymentService;
             _logger = logger;
@@ -49,8 +49,8 @@ namespace TalkSpace.Api.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (for development)
-                Console.WriteLine(ex.ToString());
+                // Log the exception using the injected logger
+                _logger.LogError(ex, "An unexpected error occurred while processing the payment.");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
 

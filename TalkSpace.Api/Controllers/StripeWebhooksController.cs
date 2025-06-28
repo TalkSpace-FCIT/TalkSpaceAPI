@@ -49,7 +49,7 @@ namespace TalkSpace.Api.Controllers
                 {
                     await paymentService.HandlePaymentConfirmationAsync(json, stripeSignature);
                     _logger.LogInformation("Payment webhook processed successfully");
-                    return Ok(new { received = true ,mewssage= "the payment webhook has captured successfully" });
+                    return Ok(new { received = true, message = "the payment webhook has captured successfully" });
                 }
                 catch (StripeException ex)
                 {
