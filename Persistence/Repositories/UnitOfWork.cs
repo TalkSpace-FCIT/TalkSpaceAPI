@@ -25,11 +25,6 @@ namespace Persistence.Repositories
 
         public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         {
-<<<<<<< HEAD
-            return await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-=======
             try
             {
                 return await _dbContext.SaveChangesAsync(cancellationToken);
@@ -54,7 +49,6 @@ namespace Persistence.Repositories
         }
 
 
->>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
         public async Task RollbackAsync()
         {
             await _dbContext.Database.RollbackTransactionAsync();

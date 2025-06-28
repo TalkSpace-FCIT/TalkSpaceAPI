@@ -17,10 +17,7 @@
     <PackageReference Include="iTextSharp" Version="5.5.13.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Serilog" Version="4.2.0" />
-<<<<<<< HEAD
-=======
     <PackageReference Include="Stripe.net" Version="48.2.0" />
->>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
   </ItemGroup>
 
   <ItemGroup>

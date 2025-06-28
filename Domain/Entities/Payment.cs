@@ -17,9 +17,6 @@ namespace Domain.Entities
         // Navigation Property
         public Billing Billing { get; set; }
 
-
     }
-
-
 
 }
