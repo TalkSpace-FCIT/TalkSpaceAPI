@@ -73,10 +73,10 @@ namespace Application.Services
                 // Handle different event types
                 switch (stripeEvent.Type)
                 {
-                    case "PaymentIntentSucceeded":
+                    case "payment_intent.succeeded":
                         await HandlePaymentIntentSucceeded(stripeEvent);
                         break;
-                    case "ChargeSucceeded":
+                    case "charge.succeeded":
                         await HandleChargeSucceeded(stripeEvent);
                         break;
                     default:

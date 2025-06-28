@@ -12,10 +12,8 @@ namespace Persistence.Repositories
 {
     public class PaymentRepository:Repository<Payment>, IpaymentRepository
     {
-        private DbSet<Payment> _dbset;
         public PaymentRepository(AppDbContext _dbcontext):base(_dbcontext)
         {
-            _dbset = _dbcontext.Set<Payment>();
         }
         
 

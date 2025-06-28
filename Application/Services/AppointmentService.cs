@@ -66,7 +66,6 @@ namespace Application.Services
             appointment.StatusUpdatedOn = DateTime.UtcNow;
 
             await _appointmentRepository.AddAsync(appointment);
-            await _unitOfWork.CommitAsync();
             var billing = new Billing
             {
                 AppointmentId = appointment.Id,
