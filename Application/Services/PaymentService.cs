@@ -156,6 +156,7 @@ namespace Application.Services
             var payments = await paymentrepository.FindAsync(p => p.PaymentIntentId == paymentIntent.Id);
             var payment = payments.FirstOrDefault();
             _logger.LogDebug("Payment has Allocated by PaymentIntentID {paymentIntent} ", paymentIntent.Id);
+            _logger.LogDebug("the payment json ",payment.ToString());
 
             if (payment != null && payment.PaymentStatus == PaymentStatus.Pending)
             {
