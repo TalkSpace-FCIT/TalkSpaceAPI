@@ -8,6 +8,7 @@ using Domain.Interfaces;
 using Domain.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Persistence.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,14 +21,16 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IBillingRepository _billingRepository;
         private readonly IRepository<Appointment> _appointmentRepository;
         private readonly IRepository<AppUser> _userRepository;
         private readonly IRepository<Patient> _PatientRepository;
 
-        public AppointmentService(IUnitOfWork unitOfWork, IMapper mapper)
+        public AppointmentService(IUnitOfWork unitOfWork, IMapper mapper,IBillingRepository billingRepository)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _billingRepository = billingRepository;
             _appointmentRepository = unitOfWork.GetRepository<Appointment>();
             _userRepository = unitOfWork.GetRepository<AppUser>();
             _PatientRepository = unitOfWork.GetRepository<Patient>();
@@ -63,6 +66,14 @@ namespace Application.Services
             appointment.StatusUpdatedOn = DateTime.UtcNow;
 
             await _appointmentRepository.AddAsync(appointment);
+            var billing = new Billing
+            {
+                AppointmentId = appointment.Id,
+                PatientId = appointment.PatientId,
+                InvoiceDate = DateTime.UtcNow,
+                Status = PaymentStatus.Pending
+            };
+            await _billingRepository.AddAsync(billing);
             await _unitOfWork.CommitAsync();
 
             var response = _mapper.Map<AppointmentResponse>(appointment);
@@ -144,7 +155,7 @@ namespace Application.Services
                 TotalCount = appointments.Count()
             };
 
-            return Result<AppointmentListResponse>.Success(response, "Opertational Done Successfully");
+            return Result<AppointmentListResponse>.Success(response, "Operation Done Successfully");
         }
 
         public async Task<Result<AppointmentResponse>> UpdateAppointmentAsync(int id, UpdateAppointmentRequest request)
