@@ -8,6 +8,10 @@ using Domain.Interfaces;
 using Domain.Results;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+<<<<<<< HEAD
+=======
+using Persistence.Repositories;
+>>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,14 +24,26 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+<<<<<<< HEAD
+=======
+        private readonly IBillingRepository _billingRepository;
+>>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
         private readonly IRepository<Appointment> _appointmentRepository;
         private readonly IRepository<AppUser> _userRepository;
         private readonly IRepository<Patient> _PatientRepository;
 
+<<<<<<< HEAD
         public AppointmentService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+=======
+        public AppointmentService(IUnitOfWork unitOfWork, IMapper mapper,IBillingRepository billingRepository)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _billingRepository = billingRepository;
+>>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
             _appointmentRepository = unitOfWork.GetRepository<Appointment>();
             _userRepository = unitOfWork.GetRepository<AppUser>();
             _PatientRepository = unitOfWork.GetRepository<Patient>();
@@ -64,6 +80,18 @@ namespace Application.Services
 
             await _appointmentRepository.AddAsync(appointment);
             await _unitOfWork.CommitAsync();
+<<<<<<< HEAD
+=======
+            var billing = new Billing
+            {
+                AppointmentId = appointment.Id,
+                PatientId = appointment.PatientId,
+                InvoiceDate = DateTime.UtcNow,
+                Status = PaymentStatus.Pending
+            };
+            await _billingRepository.AddAsync(billing);
+            await _unitOfWork.CommitAsync();
+>>>>>>> 9c4095104afee9160254db4bd7c046fc7cae3d63
 
             var response = _mapper.Map<AppointmentResponse>(appointment);
             response.DoctorName = $"{doctor.FullName}";

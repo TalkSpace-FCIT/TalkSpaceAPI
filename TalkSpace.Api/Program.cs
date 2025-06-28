@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Serilog;
 using System.Threading.Tasks;
 using TalkSpace.Api;
+using Stripe;
 
 public class Program
 {
@@ -28,7 +29,7 @@ public class Program
                 .Enrich.FromLogContext()
                 .WriteTo.Console());
             // Register Services to IoC
-
+            StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
             builder.AddServices();
 
             var app = builder.Build();

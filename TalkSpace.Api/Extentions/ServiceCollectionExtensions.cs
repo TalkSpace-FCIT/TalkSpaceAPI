@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using TalkSpace.API;
 using Application.Mappings;
 using System.Security.Claims;
+using Application.Settings;
 
 
 namespace TalkSpace.Api.Extensions
@@ -83,10 +84,13 @@ namespace TalkSpace.Api.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IMedicalRecordsService, MedicalRecordService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<IpaymentRepository, PaymentRepository>();
             services.AddScoped<IAppointmentService, AppointmentService>();
+            services.AddScoped<IBillingRepository, BillingRepository>();
             services.AddSingleton<IStorageService>(provider =>
                 new LocalStorageService(Path.Combine(environment.ContentRootPath, "PrivateStorage", "Reports")));
-
+            services.AddScoped<IpaymentService, PaymentService>();
+            services.AddScoped<IStripeHelperService, StripeHelperService>();
             services.AddTransient<IPdfGenerator, PdfGenerator>();
         }
 
@@ -130,6 +134,7 @@ namespace TalkSpace.Api.Extensions
         {
             services.Configure<DatabaseConnections>(configuration.GetSection("ConnectionStrings"));
             services.Configure<JWT>(configuration.GetSection("JWT"));
+            services.Configure<StripeSetting>(configuration.GetSection("Stripe"));
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
